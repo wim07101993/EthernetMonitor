@@ -1,0 +1,130 @@
+﻿<Window
+    x:Class="EthernetMonitor.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:EthernetMonitor"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    Title="Monitor"
+    Background="{DynamicResource MaterialDesignPaper}"
+    FontFamily="{DynamicResource MaterialDesignFont}"
+    TextElement.FontSize="13"
+    TextElement.FontWeight="Regular"
+    TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+    TextOptions.TextFormattingMode="Ideal"
+    TextOptions.TextRenderingMode="Auto">
+
+    <Window.DataContext>
+        <local:MainWindowViewModel />
+    </Window.DataContext>
+
+    <DockPanel>
+        <materialDesign:ColorZone
+            Padding="16"
+            DockPanel.Dock="Top"
+            Mode="PrimaryMid">
+            <StackPanel Orientation="Horizontal">
+                <Button
+                    Width="120"
+                    Command="{Binding ConnectCommand}"
+                    Content="Connect"
+                    IsEnabled="{Binding IsConnecting, Converter={x:Static local:InvertedBooleanConverter.Instance}}"
+                    Style="{StaticResource MaterialDesignFlatAccentBgButton}" />
+                <Button
+                    Width="120"
+                    Margin="16,0,0,0"
+                    Command="{Binding DisconnectCommand}"
+                    Content="Disconnect"
+                    IsEnabled="{Binding IsDisconnecting, Converter={x:Static local:InvertedBooleanConverter.Instance}}"
+                    Style="{StaticResource MaterialDesignFlatAccentBgButton}" />
+                <materialDesign:ColorZone
+                    Margin="32,0,0,0"
+                    Padding="8"
+                    VerticalAlignment="Stretch"
+                    CornerRadius="4"
+                    Mode="Light">
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox
+                            Margin="4,0"
+                            Content="Auto send"
+                            IsChecked="{Binding IsAutoSendEnabled}">
+                            <CheckBox.IsEnabled>
+                                <MultiBinding Converter="{x:Static local:MultiBooleanAndConverter.Instance}">
+                                    <Binding Path="IsServerEnabled" />
+                                    <Binding Path="IsClientEnabled" />
+                                </MultiBinding>
+                            </CheckBox.IsEnabled>
+                        </CheckBox>
+                        <CheckBox
+                            Margin="4,0"
+                            Content="Enable server"
+                            IsChecked="{Binding IsServerEnabled}" />
+                        <CheckBox
+                            Margin="4,0"
+                            Content="Enable client"
+                            IsChecked="{Binding IsClientEnabled}" />
+                    </StackPanel>
+                </materialDesign:ColorZone>
+            </StackPanel>
+        </materialDesign:ColorZone>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="4*" />
+                <RowDefinition Height="4" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <ScrollViewer
+                    Grid.Column="0"
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <StackPanel IsEnabled="{Binding IsServerEnabled}">
+                        <TextBlock
+                            Margin="24,0"
+                            Style="{StaticResource MaterialDesignHeadline3TextBlock}"
+                            Text="Server" />
+                        <local:ConnectionView DataContext="{Binding Server}" />
+                    </StackPanel>
+                </ScrollViewer>
+
+
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel IsEnabled="{Binding IsClientEnabled}">
+                        <TextBlock
+                            Margin="24,0"
+                            Style="{StaticResource MaterialDesignHeadline3TextBlock}"
+                            Text="Client" />
+                        <local:ConnectionView DataContext="{Binding Client}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <GridSplitter
+                Grid.Row="1"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch" />
+
+            <ScrollViewer
+                x:Name="ConsoleOutputScrollviewer"
+                Grid.Row="2"
+                ScrollChanged="OnConsoleOutputScrollviewerScrollChanged">
+                <ItemsControl Margin="24,0,24,16" ItemsSource="{Binding ConsoleOutput}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                Margin="0,-4,0,-4"
+                                FontFamily="Consolas"
+                                Text="{Binding .}" />
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</Window>
